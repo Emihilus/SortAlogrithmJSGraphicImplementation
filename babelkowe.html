@@ -1,0 +1,605 @@
+<!doctype html>
+																	<html>
+																	<head>
+																	<meta charset="utf-8">
+																	<meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+																	<style>
+																	body {
+																		/*wyzerowanie marginesu*/
+margin: 0;
+																		/*body ma zajmować wysokosć przeglądarki*/
+height: 100vh;
+																		/*wyśrodkowanie elementu canvas*/
+display: flex;
+																		align-items: center;
+																		justify-content: center;
+																				/*kolor tła całej strony*/
+																				background-color: darkgray;
+																			}
+
+																			canvas {
+																				/*określamy obramowania canvas*/
+border: 3px solid #fff;
+																			}
+																			</style>
+	<title>ALGO</title>
+</head>
+<body> 
+	<canvas>
+</canvas>
+</body>
+<script>
+
+class Point
+{
+	constructor (x,y)
+	{
+		this.x = x;
+		this.y = y;
+	}
+}
+
+class ScheEl
+{
+	constructor(cctx,txt, posX, posY, type, cTo, cTN, pathArray,cTNo)
+	{
+		this.active = false;
+		this.cctx = cctx;
+		this.txt = txt;
+		this.posX = posX;
+		this.posY = posY;
+		this.type = type;
+		this.cTo = cTo;
+		this.cTN = cTN;
+		this.pathArray = pathArray;
+		this.cTNo = cTNo;
+		
+		switch(this.type)
+		{
+			case 0:
+			this.mwidth = this.cctx.measureText(this.txt).width;
+			this.mhei = this.cctx.measureText("M").width;
+			this.rround = 10;
+			this.outputPointX = this.posX + this.mwidth/2;
+			this.outputPointY = this.posY + this.mhei+this.rround/2;
+			
+			this.inputPointX = this.posX + this.mwidth/2;
+			this.inputPointY = this.posY - this.mhei;
+			break;
+			
+			case 1:
+			this.mwidth = this.cctx.measureText(this.txt).width;
+			this.mhei = this.cctx.measureText("M").width;
+			this.rround = 5;
+			this.inputPointX = this.posX + this.mwidth/2;
+			this.inputPointY = this.posY - this.mhei-this.rround/2;
+			this.outputPointX = this.posX + this.mwidth/2;
+			this.outputPointY = this.posY + this.mhei+this.rround/2;
+			break;
+			
+			case 2:
+			this.mwidth = this.cctx.measureText(this.txt).width;
+			this.mhei = this.cctx.measureText("M").width;
+			this.rround = 30;
+			this.inputPointX = this.posX + this.mwidth/2;
+			this.inputPointY = this.posY - this.mhei-this.rround/2;
+			this.outputPointX = this.posX + this.mwidth/2;
+			this.outputPointY = this.posY-this.mhei-this.rround/2 + this.mhei*2.5+this.rround/2 ;
+			
+			this.nOutputPointX = this.posX + this.mwidth+ this.rround;
+			this.nOutputPointY = this.posY - this.mhei/2.5;
+			break;
+			
+			case 20:
+			var calcXAnc, calcYAnc;
+			
+			
+			if(this.cTo.outputPointX>=this.cTN.inputPointX)
+				calcXAnc = this.cTo.outputPointX - (this.cTo.outputPointX - this.cTN.inputPointX)/2;
+			else
+				calcXAnc = this.cTN.outputPointX - (this.cTN.outputPointX - this.cTo.inputPointX)/2;
+			
+			if(this.cTo.outputPointY>=this.cTN.inputPointY)
+				calcYAnc = this.cTo.outputPointY - (this.cTo.outputPointY - this.cTN.inputPointY)/2;
+			else
+				calcYAnc = this.cTN.outputPointY - (this.cTN.outputPointY - this.cTo.inputPointY)/2;
+			
+			this.inputPointX = calcXAnc;
+			this.inputPointY = calcYAnc;
+			
+			break;
+		}
+		
+	}
+	
+	drawSelf()
+	{
+		switch (this.type)
+		{
+			
+			case 0: //dummy start
+				this.cctx.strokeStyle = '#fff';
+				this.cctx.beginPath();
+				this.cctx.roundedRectangle(this.posX-this.rround, this.posY-this.mhei, this.mwidth+this.rround*2, this.mhei*2+this.rround/2, 10);
+				if(this.active)
+				{
+					ctx.fillStyle = '#0f0';
+					this.cctx.fill();
+					ctx.fillStyle = '#fff';
+				}
+				this.cctx.stroke();
+				this.cctx.fillText(this.txt,this.posX, this.posY+this.mhei/2);
+			break;
+			
+			case 1: //assign
+				this.cctx.strokeStyle = '#fff';
+				this.cctx.beginPath();
+				this.cctx.rect(this.posX-this.rround, this.posY-this.mhei, this.mwidth+this.rround*2,this.mhei*2+this.rround/2);
+					if(this.active)
+				{
+					ctx.fillStyle = '#0f0';
+					this.cctx.fill();
+					ctx.fillStyle = '#fff';
+				}
+				this.cctx.stroke();
+				this.cctx.fillText(this.txt,this.posX, this.posY+this.mhei/2);
+			break;
+			
+			case 2: // CONDITIONAL
+				this.cctx.strokeStyle = '#fff';
+				this.cctx.beginPath();
+				this.cctx.rhombus(this.posX-this.rround, this.posY-this.mhei-this.rround/2, this.mwidth+this.rround*2,this.mhei*2.5+this.rround/2);
+				this.cctx.stroke();
+				
+				if(this.active)
+				{
+					ctx.fillStyle = '#0f0';
+					this.cctx.fill();
+					ctx.fillStyle = '#fff';
+				}
+				
+				
+				this.cctx.fillText(this.txt,this.posX, this.posY);
+			break;
+			
+			
+			
+			case 20: //arrow
+				this.cctx.strokeStyle = '#fff';
+				this.cctx.beginPath();
+				var startx,starty;
+				if(this.cTNo)
+				{
+					startx = this.cTo.nOutputPointX;
+					starty = this.cTo.nOutputPointY;
+				}
+				else
+				{
+					startx = this.cTo.outputPointX;
+					starty = this.cTo.outputPointY;
+				}
+				
+				if(this.pathArray == null)
+				{
+					this.cctx.arrow(startx, starty,this.cTN.inputPointX,this.cTN.inputPointY);
+				}	
+				else
+				{
+					this.cctx.moveTo(startx, starty);
+					this.cctx.lineTo(this.pathArray[0].x,this.pathArray[0].y);
+					for(var z = 1; z < this.pathArray.length; z++)
+					{
+						//this.cctx.moveTo(this.pathArray[z-1].x, this.pathArray[z-1].y);
+						this.cctx.lineTo(this.pathArray[z].x,this.pathArray[z].y);
+						console.log("CACLA");
+					}
+					this.cctx.arrow(this.pathArray[this.pathArray.length-1].x, this.pathArray[this.pathArray.length-1].y,this.cTN.inputPointX,this.cTN.inputPointY)
+				}
+				
+				if(this.active)
+				{
+					ctx.strokeStyle = '#0f0';
+					this.cctx.stroke();
+					ctx.strokeStyle = '#fff';
+				}
+				else
+				this.cctx.stroke();
+				
+				if(this.cTo.type ==2)
+					;//this.cctx.fillText("T",this.cTo.outputPointX-20, this.cTo.outputPointY + (this.cTN.inputPointY - this.cTo.outputPointY)/2);
+				
+								
+			break;
+		}
+		if(this.active)
+			this.active = false;
+	}
+	
+	markAsActive()
+	{
+		this.active=true;
+	}
+}
+
+var ScheElArray = new Array;
+
+CanvasRenderingContext2D.prototype.roundedRectangle = function(x, y, width, height, rounded) {
+  const radiansInCircle = 2 * Math.PI
+  const halfRadians = (2 * Math.PI)/2
+  const quarterRadians = (2 * Math.PI)/4  
+  
+  // top left arc
+  this.arc(rounded + x, rounded + y, rounded, -quarterRadians, halfRadians, true)
+  
+  // line from top left to bottom left
+  this.lineTo(x, y + height - rounded)
+
+  // bottom left arc  
+  this.arc(rounded + x, height - rounded + y, rounded, halfRadians, quarterRadians, true)  
+  
+  // line from bottom left to bottom right
+  this.lineTo(x + width - rounded, y + height)
+
+  // bottom right arc
+  this.arc(x + width - rounded, y + height - rounded, rounded, quarterRadians, 0, true)  
+  
+  // line from bottom right to top right
+  this.lineTo(x + width, y + rounded)  
+
+  // top right arc
+  this.arc(x + width - rounded, y + rounded, rounded, 0, -quarterRadians, true)  
+  
+  // line from top right to top left
+  this.lineTo(x + rounded, y)  
+}
+
+
+
+CanvasRenderingContext2D.prototype.arrow = function(fromx, fromy, tox, toy) {
+ var headlen = 10; // length of head in pixels
+  var dx = tox - fromx;
+  var dy = toy - fromy;
+  var angle = Math.atan2(dy, dx);
+  this.moveTo(fromx, fromy);
+  this.lineTo(tox, toy);
+  this.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+  this.moveTo(tox, toy);
+  this.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+}
+
+CanvasRenderingContext2D.prototype.rhombus = function(sX, sY, width, height) {
+	
+	this.moveTo (sX, sY+height/2);
+	this.lineTo (sX + width/2, sY);
+	this.lineTo (sX + width, sY+height/2);
+	this.lineTo (sX + width/2, sY+height);
+	this.lineTo (sX, sY+height/2);
+}
+		
+
+
+		const canvas = document.querySelector('canvas');
+		const ctx = canvas.getContext('2d');
+		const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+		const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+		canvas.width = vw;
+		canvas.height = vh;
+		
+		
+		ctx.font = "16px Tahoma";
+		
+	/*0*/	ScheElArray.push(new ScheEl(ctx, "START", 500, 80,0, null, null));
+	/*1*/	ScheElArray.push(new ScheEl(ctx, "i <- n-1", 500-4, 130,1, null, null));
+	/*2*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[0], ScheElArray[1]));
+	/*3*/	ScheElArray.push(new ScheEl(ctx, "u <- false", 500-11, 180,1, null, null));
+	/*4*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[1], ScheElArray[3]));
+	/*5*/	ScheElArray.push(new ScheEl(ctx, "i > 0", 500+6, 250,2, null, null));
+	/*6*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[3], ScheElArray[5]));
+	/*7*/	ScheElArray.push(new ScheEl(ctx, "d[i] < d[i-1]", 500-20, 320,2, null, null));
+	/*8*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[5], ScheElArray[7]));
+	/*9*/	ScheElArray.push(new ScheEl(ctx, "u <- true", 500-10, 380,1, null, null));
+	/*10*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[7], ScheElArray[9]));
+	/*11*/	ScheElArray.push(new ScheEl(ctx, "d[i] <-> d[i-1]", 500-29, 430,1, null, null));
+	/*12*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[9], ScheElArray[11]));
+	/*13*/	ScheElArray.push(new ScheEl(ctx, "i <- i-1", 500-2, 480,1, null, null));
+	/*14*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[11], ScheElArray[13]));
+	/*15*/	ScheElArray.push(new ScheEl(ctx, "u == true", 700, 320,2, null, null));
+	/*16*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[5], ScheElArray[15],[new Point(736,245)],true));
+	/*17*/	ScheElArray.push(new ScheEl(ctx, "KONIEC", 830, 380,0, null, null));
+	/*18*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[15], ScheElArray[17],[new Point(857,315)],true));
+	/*19*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[13], ScheElArray[6],[new Point(523,530), new Point(410,530), new Point(410,218)]));
+	/*20*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[7], ScheElArray[13],[new Point(630,315), new Point(630,466)],true));
+	/*21*/	ScheElArray.push(new ScheEl(ctx, null, null, null,20, ScheElArray[15], ScheElArray[1],[new Point(734,560), new Point(380,560),new Point(380,115)]));
+
+		
+		const cw = vw*0.99;// canvas.width;
+		const ch = vh*0.99;//canvas.height;
+		
+		
+		var rawArray = new Array();
+		var array;
+		var initSize = 18;
+		var incorrect = true, visible = false;
+		var bbb ='';
+		
+		function randomInt(min, max) {
+		return min + Math.floor((max - min) * Math.random());
+}
+
+		console.log("Prezentacja algorytmow ");
+
+		rawArray = new Array(initSize);
+		for (i = 0; i < rawArray.length; i++) {
+			rawArray[i] = randomInt(1,180);
+		}
+		array = Array.from(rawArray);
+
+		console.log("Wytworzono tablice z " + initSize + " obiektami, stan inicjalny:");
+		array.forEach(function( obj) {
+			bbb += obj + " ";
+		});
+			console.log(bbb);
+
+
+		console.log("\nSortowanie za pomoca algorytmu wstaniania (insertion)");
+
+		var temp;
+		var hand = 0;
+		var cCount = 1;
+
+		for ( i = 1; i < array.length; i++) {
+			if (visible) {
+				console.log("Pozycja " + i + " --- ");
+				for (j = 0; j < array.length; j++) {
+					if (j == i)
+						console.log("[" + array[j] + "] ");
+					else
+						console.log(array[j] + " ");
+				}
+				console.log("\n");
+			}
+			while (i - hand - 1 >= 0 && array[i - hand] < array[i - hand - 1]) {
+				if (visible) {
+
+					console.log("Porownanie " + cCount + ": ");
+					for (j = 0; j < array.length; j++) {
+						if (j == i - hand - 1)
+							console.log("[" + array[j] + "<");
+						else if (j == i - hand)
+							console.log(array[j] + "] ");
+						else
+							console.log(array[j] + " ");
+					}
+					console.log("\n");
+
+				}
+
+
+				temp = array[i - hand - 1];
+				array[i - hand - 1] = array[i - hand];
+				array[i - hand] = temp;
+
+
+				hand++;
+				cCount++;
+
+
+			}
+			hand = 0;
+		}
+
+bbb = "";
+		console.log("Wynik sortowania algorytmem wstawiania (" + cCount+" swaps):");
+		array.forEach(function( obj) {
+			bbb += obj + " ";
+		});
+			console.log(bbb);
+
+///////////////////
+		console.log("\nSortowanie za pomoca algorytmu wymiany (selection sort)");
+		array= Array.from(rawArray);
+		var step = 0, inst, begin, smlstValue, smlstIndex, oldVal;
+
+		while (step < array.length) {
+			inst = step;
+			begin = step;
+			smlstValue = array[begin];
+			smlstIndex = begin;
+			while (inst < array.length) {
+				if (array[inst] < smlstValue) {
+					smlstIndex = inst;
+					smlstValue = array[inst];
+				}
+				inst++;
+			}
+
+
+			if(visible) {
+				console.log("\nStep " + step);
+				for ( i = 0; i < array.length; i++) {
+					if (i == begin || i == smlstIndex)
+						console.log("[" + array[i] + "] ");
+					else
+						console.log(array[i] + " ");
+				}
+			}
+
+			oldVal = array[begin];
+			array[begin] = array[smlstIndex];
+			array[smlstIndex] = oldVal;
+
+			step++;
+		}
+
+	bbb = "";
+		console.log("Wynik sortowania algorytmem wymiany (" + step+" swaps):");
+		array.forEach(function( obj) {
+			bbb += obj + " ";
+		});
+			console.log(bbb);
+			
+			
+			
+				var u = false;
+				array = Array.from(rawArray);
+				var tmp, swaps = 0,cb,cn;
+				//console.log("\nSortowanie za pomoca algorytmu babelkowego (bubblesort)");
+				
+				
+				
+				var i = array.length-1 ,cnt = true,correct = false, executements =0, pass = 0;
+				ScheElArray[0].markAsActive();
+				ScheElArray[1].markAsActive();
+				ScheElArray[2].markAsActive();
+				ScheElArray[3].markAsActive();
+				ScheElArray[4].markAsActive();
+				ScheElArray[6].markAsActive();
+				draw();
+				
+			function draw()
+			{
+				executements++;
+				var przes = 13;
+				ctx.fillStyle = 'black';
+				ctx.fillRect(0, 0, cw, ch);
+				ctx.fillStyle = '#00ff00';
+				ctx.font = "9px Arial";
+				//ctx.fillRect(50, 50, 15, 6);
+				
+				
+				/// WYLICZANIE //////////
+					
+					if (i > 0) // jezeli nie doszlismy do konca
+					{
+						
+						ScheElArray[5].markAsActive();
+						ScheElArray[8].markAsActive();
+						ScheElArray[7].markAsActive();
+						
+						cb = i;
+						cn = i-1;
+						
+						
+						if (array[i] < array[i - 1]) 
+						{
+							ScheElArray[9].markAsActive();
+							ScheElArray[10].markAsActive();
+							ScheElArray[11].markAsActive();
+							ScheElArray[12].markAsActive();
+							ScheElArray[14].markAsActive();
+							// wymiana
+							u = true; // unsorted - dotyczy sterowania
+							tmp = array[i];
+							array[i] = array[i - 1];
+							array[i - 1] = tmp;
+							
+							// oblsuga
+							swaps++;
+							correct = false; // correct - dotyczy rysowania
+						}
+						else
+						{
+							ScheElArray[20].markAsActive();
+							correct= true;
+						}
+							ScheElArray[13].markAsActive();
+							ScheElArray[19].markAsActive();
+							
+						i--;
+					}
+					else if (u) // doszlo do konca ale byla min 1 wymiana
+					{
+						
+							ScheElArray[15].markAsActive();
+							ScheElArray[16].markAsActive();
+							ScheElArray[21].markAsActive();
+							
+						i = array.length-1; // wiec idziemy na poczatek
+						u = false;
+						ScheElArray[1].markAsActive();
+						ScheElArray[2].markAsActive();
+						ScheElArray[3].markAsActive();
+						ScheElArray[4].markAsActive();
+						
+						pass++;
+					}
+					else // doszlo do konca i nie bylo zadnych wymian = koniec petli i rysowania
+					{
+						
+						ScheElArray[17].markAsActive();
+						ScheElArray[18].markAsActive();
+						ScheElArray[15].markAsActive();
+						cnt = false;
+					}
+						
+					/// WYLICZANIE //////////
+				
+				/// RYSOWANIE ///
+				for (r = 0; r < array.length; r++) 
+				{
+					if( r == cb || r == cn)
+					{
+						if(!correct)
+						{
+							ctx.fillStyle = '#ff0000';
+							if(r == cn)
+							{
+								ctx.fillText("SWAP",przes, 340);
+								ctx.font = "16px Arial";
+								ctx.fillText("PORÓWNANIE "+cb+" z "+cn,100, 360);
+						}
+						}
+							else
+							{
+							ctx.fillStyle = '#00ff00';
+							if(r == cn)
+							{
+									ctx.fillText("OK",przes, 340);
+									ctx.font = "16px Arial";
+									ctx.fillText("PORÓWNANIE "+cb+" z "+cn,100, 360);
+							}
+							}
+					}
+					else
+						ctx.fillStyle = '#fff';
+					
+					ctx.font = "9px Arial";
+					ctx.fillRect(przes, 300, 10, 0-array[r]);
+					ctx.fillStyle = '#fff';
+					ctx.fillText(""+array[r],przes, 320);//
+					przes += 16;
+				}
+				
+				ctx.font = "16px Tahoma";
+				ctx.fillText(pass+" PRZEJŚĆ",100, 380);//
+				ctx.fillText(executements+" PORÓWNAŃ",100, 400);//
+				ctx.fillText(swaps+" WYMIAN",100, 420);//
+				ctx.fillText("ALGORYTM BĄBELKOWY",100, 450);//
+				
+				
+				/*ctx.fillText("START",400, 100);
+				
+				ctx.strokeStyle = '#fff';
+				ctx.beginPath();
+				ctx.roundedRectangle(380, 80, 100, 30, 10);
+				ctx.moveTo(430,110);
+				ctx.lineTo(430,140);
+				ctx.stroke();*/
+				//ctx.closePath
+				
+				ScheElArray.forEach(function (sce)
+				{
+					sce.drawSelf();
+				});
+				
+				
+				
+				/// RYSOWANIE ///
+				
+				if(cnt)
+					setTimeout(draw, 1000/20);
+			}
+			
+		
+</script>
+</html>
